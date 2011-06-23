@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8 />
+		<title>CSS3 Tween</title>
+		<!--[if lte IE 8]>
+ 			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/modernizr.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/src/tween.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/src/tween.fn.scripty2.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/src/WebkitCSSMatrix.tween.js" type="text/javascript" charset="utf-8"></script>
+		
+		<script type="text/javascript" charset="utf-8">
+			$(function(){
+				
+				// List all the available easing functions
+				for(var fx in Tween.prototype.fn) {
+					$('ul#custom').append('<li>'+fx+'</li>');
+				}
+
+				$('ul').delegate('li', 'click', function(event){
+					var t = new Tween($('#elem').get(0), {
+										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'750px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)'
+									}, {
+										duration: '1500ms',
+										timingFunction: $(this).html()
+									});
+									
+					window.toggle = !window.toggle;
+					
+					$('code').html(t.css);
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div id="container">
+			<div id="elemcontainer"><div id="elem" style="width: 50px; height: 50px; background: red; border: 1px solid #000"></div></div>
+			<h1>Native</h1>
+			<ul>
+				<li>linear</li>
+				<li>ease</li>
+				<li>ease-in</li>
+				<li>ease-out</li>
+				<li>ease-in-out</li>
+			</ul>
+			<h1>Custom (borrowed from Scripty 2)</h1>
+			<ul id="custom"></ul>
+			<h1>Generated Animation CSS</h1>
+			<pre><code>
+			</code></pre>
+		</div>
+	</body>
+</html>

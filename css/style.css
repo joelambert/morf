@@ -1,0 +1,45 @@
+div#container
+{
+	width: 800px;
+	margin: 20px auto;
+	font-family: helvetica, arial, sans-serif;
+	font-size: 12px;
+}
+
+div#elemcontainer
+{
+	background: #EEE;
+}
+
+ul
+{
+	width: 800px;
+	margin: 20px 0 0 0 ;
+	padding: 0;
+	overflow: auto;
+}
+
+ul li
+{
+	list-style: none;
+	float: left;
+	margin-right: 1em;
+	margin-bottom: 1em;
+	cursor: pointer;
+	padding: 0.5em;
+	background: #f0f0f0;
+	border: 1px solid #ddd;
+}
+
+h1
+{
+	clear: both;
+	margin-top: 1.5em;
+}
+
+code
+{
+	clear: both;
+	display: block;
+	font-size: 10px;
+}
