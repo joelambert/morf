@@ -110,26 +110,25 @@ WebKitCSSMatrix.prototype.tween = function(matrix, progress, fn) {
 	var m = new WebKitCSSMatrix,
 		m1 = this.decompose(),
 		m2 = matrix.decompose(),
-		r = m.decompose();
+		r = m.decompose()
+		trans = '',
+		index = i = null;
 	
 	// Adjust the progress value based on the timing function
 	progress = fn(progress);
 	
-	for(var index in m1)
-		for(var i in {x:'x', y:'y', z:'z'})
+	for(index in m1)
+		for(i in {x:'x', y:'y', z:'z'})
 			r[index][i] = (m1[index][i] + ( (m2[index][i] - m1[index][i]) * progress )).toFixed(5);
 
 		
-	var trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
-				'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
-				'rotateX('+r.rotate.x+'rad) rotateY('+r.rotate.y+'rad) rotateZ('+r.rotate.z+'rad) ' +
-				'matrix3d(1,0,0,0, 0,1,0,0, 0,'+r.skew.z+',1,0, 0,0,0,1) ' +
-				'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
-				'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
-				'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')' +
-				'';
-				
-	console.log(trans);
+	trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
+			'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
+			'rotateX('+r.rotate.x+'rad) rotateY('+r.rotate.y+'rad) rotateZ('+r.rotate.z+'rad) ' +
+			'matrix3d(1,0,0,0, 0,1,0,0, 0,'+r.skew.z+',1,0, 0,0,0,1) ' +
+			'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
+			'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
+			'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')';
 	
 	m = new WebKitCSSMatrix(trans);
 	
@@ -146,11 +145,9 @@ WebKitCSSMatrix.prototype.tween = function(matrix, progress, fn) {
 
 WebKitCSSMatrix.prototype.transformVector = function(v) {
 	// TODO: Do we need to mod this for Vector4?
-	var xOut = this.m11*v.x + this.m12*v.y + this.m13*v.z;
-	var yOut = this.m21*v.x + this.m22*v.y + this.m23*v.z;
-	var zOut = this.m31*v.x + this.m32*v.y + this.m33*v.z;
-	
-	return new Vector4(xOut, yOut, zOut);
+	return new Vector4(	this.m11*v.x + this.m12*v.y + this.m13*v.z, 
+						this.m21*v.x + this.m22*v.y + this.m23*v.z, 
+						this.m31*v.x + this.m32*v.y + this.m33*v.z );
 };
 
 
@@ -161,11 +158,11 @@ WebKitCSSMatrix.prototype.transformVector = function(v) {
  */
 
 WebKitCSSMatrix.prototype.transpose = function() {
-	var matrix = new WebKitCSSMatrix();
+	var matrix = new WebKitCSSMatrix(), n = m = 0;
 	
-	for (var n = 0; n <= 4-2; n++)
+	for (n = 0; n <= 4-2; n++)
 	{
-		for (var m = n + 1; m <= 4-1; m++)
+		for (m = n + 1; m <= 4-1; m++)
 		{
 			matrix['m'+(n+1)+(m+1)] = this['m'+(m+1)+(n+1)];
 			matrix['m'+(m+1)+(n+1)] = this['m'+(n+1)+(m+1)];
@@ -206,7 +203,9 @@ WebKitCSSMatrix.prototype.determinant = function() {
  */
 
 WebKitCSSMatrix.prototype.decompose = function() {
-	var matrix = new WebKitCSSMatrix(this.toString());
+	var matrix = new WebKitCSSMatrix(this.toString()),
+		perspectiveMatrix = rightHandSide = inversePerspectiveMatrix = transposedInversePerspectiveMatrix =
+		perspective = translate = row = i = scale = skew = pdum3 =  rotate = null;
 	
 	// Normalize the matrix.
 	if (matrix.m33 == 0)
@@ -219,7 +218,7 @@ WebKitCSSMatrix.prototype.decompose = function() {
 
 	// perspectiveMatrix is used to solve for perspective, but it also provides
 	// an easy way to test for singularity of the upper 3x3 component.
-	var perspectiveMatrix = matrix;
+	perspectiveMatrix = matrix;
 
 	for (i = 1; i <= 3; i++)
 	    perspectiveMatrix['m'+i+'4'] = 0;
@@ -233,13 +232,13 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	if (matrix.m14 != 0 || matrix.m24 != 0 || matrix.m34 != 0)
 	{
 	    // rightHandSide is the right hand side of the equation.
-		var rightHandSide = new Vector4(matrix.m14, matrix.m24, matrix.m34, matrix.m44);
+		rightHandSide = new Vector4(matrix.m14, matrix.m24, matrix.m34, matrix.m44);
 		
 	    // Solve the equation by inverting perspectiveMatrix and multiplying
 	    // rightHandSide by the inverse.
-	    var inversePerspectiveMatrix 			= perspectiveMatrix.inverse();
-	    var transposedInversePerspectiveMatrix 	= inversePerspectiveMatrix.transpose();
-	    var perspective 						= transposedInversePerspectiveMatrix.transformVector(rightHandSide);
+	    inversePerspectiveMatrix 			= perspectiveMatrix.inverse();
+	    transposedInversePerspectiveMatrix 	= inversePerspectiveMatrix.transpose();
+	    perspective 						= transposedInversePerspectiveMatrix.transformVector(rightHandSide);
 
 	     // Clear the perspective partition
 	    matrix.m14 = matrix.m24 = matrix.m34 = 0;
@@ -248,22 +247,22 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	else
 	{
 		// No perspective.
-		var perspective = new Vector4(0,0,0,1);
+		perspective = new Vector4(0,0,0,1);
 	}
 
 	// Next take care of translation
-	var translate = new Vector4(matrix.m41, matrix.m42, matrix.m43);
+	translate = new Vector4(matrix.m41, matrix.m42, matrix.m43);
 
 	matrix.m41 = 0;
 	matrix.m42 = 0;
 	matrix.m43 = 0;	
 	
 	// Now get scale and shear. 'row' is a 3 element array of 3 component vectors
-	var row = [
+	row = [
 		new Vector4(), new Vector4(), new Vector4()
 	];
 	
-	for (var i = 1; i <= 3; i++)
+	for (i = 1; i <= 3; i++)
 	{
 		row[i-1].x = matrix['m'+i+'1'];
 	    row[i-1].y = matrix['m'+i+'2'];
@@ -271,8 +270,8 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	}
 
 	// Compute X scale factor and normalize first row.
-	var scale = new Vector4(),
-		skew = new Vector4();
+	scale = new Vector4();
+	skew = new Vector4();
 	
 	scale.x = row[0].length();
 	row[0] = row[0].normalise();
@@ -301,10 +300,10 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	// At this point, the matrix (in rows) is orthonormal.
 	// Check for a coordinate system flip.  If the determinant
 	// is -1, then negate the matrix and the scaling factors.
-	var pdum3 = row[1].cross(row[2])
+	pdum3 = row[1].cross(row[2])
 	if (row[0].dot(pdum3) < 0)
 	{
-		for (var i = 0; i < 3; i++)
+		for (i = 0; i < 3; i++)
 		{
 	        scale.x *= -1;
 	        row[i].x *= -1;
@@ -314,7 +313,7 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	}
 
 	// Now, get the rotations out
-	var rotate = new Vector4();
+	rotate = new Vector4();
 	rotate.y = Math.asin(-row[0].z);
 	if (Math.cos(rotate.y) != 0)
 	{
@@ -326,7 +325,6 @@ WebKitCSSMatrix.prototype.decompose = function() {
 		rotate.x = Math.atan2(-row[2].x, row[1].y);
 		rotate.z = 0;
 	}
-	
 	
 	return {
 		perspective: perspective,
