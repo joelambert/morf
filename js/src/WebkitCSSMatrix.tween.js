@@ -1,3 +1,7 @@
+// Wrap this functionality up to prevent poluting the global namespace
+(function(){
+
+
 /**
  * A 4 dimensional vector
  * @author Joe Lambert
@@ -365,12 +369,7 @@ WebKitCSSMatrix.prototype.decompose = function() {
 		scale: scale,
 		rotate: rotate
 	});
-	
-	// return {
-	// 	perspective: perspective,
-	// 	translate: translate,
-	// 	skew: skew,
-	// 	scale: scale,
-	// 	rotate: rotate
-	// };
-};;
+};
+
+
+})();

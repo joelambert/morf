@@ -155,6 +155,7 @@ var Tween = function(elem, css, opts) {
 	addKeyframeRule(this.css);
 	
 	var listener = function(event){
+		// Dispatch a faux webkitTransitionEnd event to complete the appearance of this being a transition rather than an animation
 		elem.removeEventListener('webkitTransitionEnd', listener, true);
 		var event = document.createEvent("Event");
 		event.initEvent("webkitTransitionEnd", true, true);
