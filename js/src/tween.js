@@ -1,5 +1,5 @@
 var Tween = function(elem, css, opts) {
-	var from = {}, //new WebKitCSSMatrix(elem.style.WebkitTransform),
+	var from = {},
 		fromElem = document.createElement('div'),
 		to = {},
 		toElem = document.createElement('div'),
@@ -10,6 +10,7 @@ var Tween = function(elem, css, opts) {
 		opacity = function(val){
 			return 	val === "" ? 1 : parseFloat(val);
 		},
+		
 		// List of properties that can be modified and the function which handles the values
 		allowedProps = {
 			WebkitTransform: true,
@@ -31,13 +32,25 @@ var Tween = function(elem, css, opts) {
 			duration: null,
 			increment: 0.01,
 			debug: false
-		};
+		},
+		
+	// Define all other var's used in the function
+	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = null,
+	
+	// Event listener for the webkitAnimationEnd Event
+	animationEndListener = function(event){
+		// Dispatch a faux webkitTransitionEnd event to complete the appearance of this being a transition rather than an animation
+		elem.removeEventListener('webkitAnimationEnd', animationEndListener, true);
+		transEvent = document.createEvent("Event");
+		transEvent.initEvent("webkitTransitionEnd", true, true);
+		elem.dispatchEvent(transEvent);
+	};
 	
 	// Setup the options	
-	for(var i in opts)
+	for(i in opts)
 		options[i] = opts[i];
 		
-	// If timingFunction is a natively supported function then just triger normal transition
+	// If timingFunction is a natively supported function then just trigger normal transition
 	if(	options.timingFunction === 'ease' || 
 		options.timingFunction === 'linear' || 
 		options.timingFunction === 'ease-in' || 
@@ -48,8 +61,8 @@ var Tween = function(elem, css, opts) {
 		elem.style.webkitTransitionDuration = options.duration;
 		elem.style.webkitTransitionTimingFunction = options.timingFunction;
 		
-		for(var rule in css) {
-			var camel = rule.toCamel();	
+		for(rule in css) {
+			camel = rule.toCamel();	
 			elem.style[camel] = css[rule];
 		}
 		
@@ -64,9 +77,9 @@ var Tween = function(elem, css, opts) {
 	}
 			
 	
-	for(var rule in css)
+	for(rule in css)
 	{
-		var camel = rule.toCamel();	
+		camel = rule.toCamel();	
 		
 		toElem.style[camel] = css[rule];
 		
@@ -77,10 +90,6 @@ var Tween = function(elem, css, opts) {
 
 			// Set the to/end state
 			to[camel] 	= (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : allowedProps[camel](css[rule]);
-		}
-		else
-		{
-			console.log("can't handle: "+camel);
 		}
 	}
 	
@@ -100,15 +109,15 @@ var Tween = function(elem, css, opts) {
 	
 	// Produces a CSS string representation of the Keyframes
 	createAnimationCSS = function(kf, name) {
-		var str = '@-webkit-keyframes '+name+' {\n', f = null, fStr = '';
+		var str = '@-webkit-keyframes '+name+' {\n', f = pos = rule = null, fStr = '';
 		
-		for(var pos in kf)
+		for(pos in kf)
 		{
 			f = kf[pos];
 			fStr = '\t'+pos+' {\n';
 			
 			
-			for(var rule in f)
+			for(rule in f)
 				fStr += '\t\t'+rule.toDash()+': '+f[rule]+';\n';
 			
 			fStr += "\t}\n\n";
@@ -128,16 +137,16 @@ var Tween = function(elem, css, opts) {
 	// Decomposing the matrix is expensive so we need to minimise these requests
 	if(from['WebkitTransform'])
 	{
-		var m1 = from.WebkitTransform.decompose(),
-			m2 = to.WebkitTransform.decompose();
+		m1 = from.WebkitTransform.decompose();
+		m2 = to.WebkitTransform.decompose();
 	}
 	
 	// Produce style keyframes
-	for(var progress = 0; progress <= 1; progress += options.increment) {
-		var frame = {};
+	for(progress = 0; progress <= 1; progress += options.increment) {
+		frame = {};
 
-		for(var ruleName in from) {
-			var rule = from[ruleName];
+		for(ruleName in from) {
+			rule = from[ruleName];
 			if(ruleName === 'WebkitTransform')
 				frame[ruleName] = m1.tween(m2, progress, this.fn[options.timingFunction]);
 			else
@@ -154,25 +163,17 @@ var Tween = function(elem, css, opts) {
 	this.css = createAnimationCSS(keyframes, animName);
 	addKeyframeRule(this.css);
 	
-	var listener = function(event){
-		// Dispatch a faux webkitTransitionEnd event to complete the appearance of this being a transition rather than an animation
-		elem.removeEventListener('webkitTransitionEnd', listener, true);
-		var event = document.createEvent("Event");
-		event.initEvent("webkitTransitionEnd", true, true);
-		elem.dispatchEvent(event);
-	};
-	
 	// Set the final position from as this should be a transition not an animation
-	for(var rule in to) 
+	for(rule in to) 
 		elem.style[rule] = to[rule];
 	
 	// Trigger the animation
-	elem.addEventListener('webkitAnimationEnd', listener);
+	elem.addEventListener('webkitAnimationEnd', animationEndListener);
 	elem.style.webkitAnimationDuration = options.duration;
 	elem.style.webkitAnimationTimingFunction = 'linear';
 	elem.style.webkitAnimationName = animName;
 
-	if(options.debug)
+	if(options.debug && window.console && window.console.log)
 		console.log(createAnimationCSS(keyframes, animName));
 };
 
