@@ -95,6 +95,55 @@ var Vector4 = function(x, y, z, w)
 
 
 /**
+ * Object containing the decomposed components of a matrix
+ * @author Joe Lambert
+ * @constructor
+ */
+
+var CSSMatrixDecomposed = function(obj) {
+	obj === undefined ? obj = {} : null;
+	var components = {perspective: null, translate: null, skew: null, scale: null, rotate: null};
+	
+	for(var i in components)
+		this[i] = obj[i] ? obj[i] : new Vector4();
+	
+	/**
+	 * Tween between two decomposed matrices
+	 * @param {CSSMatrixDecomposed} dm The destination decomposed matrix
+	 * @param {float} progress A float value between 0-1, representing the percentage of completion
+	 * @param {function} fn An easing function following the prototype function(pos){}
+	 * @author Joe Lambert
+	 * @returns {WebKitCSSMatrix} A new matrix for the tweened state
+	 */
+		
+	this.tween = function(dm, progress, fn) {
+		if(fn === undefined)
+			fn = function(pos) {return pos;}; // Default to a linear easing
+			
+		var r = new CSSMatrixDecomposed(),
+			i = index = null,
+			trans = '';
+		
+		progress = fn(progress);
+
+		for(index in components)
+			for(i in {x:'x', y:'y', z:'z', w:'w'})
+				r[index][i] = parseFloat((this[index][i] + (dm[index][i] - this[index][i]) * progress ).toFixed(10));
+
+		trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
+				'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
+				'rotateX('+r.rotate.x+'rad) rotateY('+r.rotate.y+'rad) rotateZ('+r.rotate.z+'rad) ' +
+				'matrix3d(1,0,0,0, 0,1,0,0, 0,'+r.skew.z+',1,0, 0,0,0,1) ' +
+				'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
+				'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
+				'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')';
+
+		return new WebKitCSSMatrix(trans);
+	};
+};
+
+
+/**
  * Tween between two matrices
  * @param {WebKitCSSMatrix} matrix The destination matrix
  * @param {float} progress A float value between 0-1, representing the percentage of completion
@@ -114,25 +163,8 @@ WebKitCSSMatrix.prototype.tween = function(matrix, progress, fn) {
 		trans = '',
 		index = i = null;
 	
-	// Adjust the progress value based on the timing function
-	progress = fn(progress);
-	
-	for(index in m1)
-		for(i in {x:'x', y:'y', z:'z'})
-			r[index][i] = (m1[index][i] + ( (m2[index][i] - m1[index][i]) * progress )).toFixed(5);
-
-		
-	trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
-			'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
-			'rotateX('+r.rotate.x+'rad) rotateY('+r.rotate.y+'rad) rotateZ('+r.rotate.z+'rad) ' +
-			'matrix3d(1,0,0,0, 0,1,0,0, 0,'+r.skew.z+',1,0, 0,0,0,1) ' +
-			'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
-			'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
-			'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')';
-	
-	m = new WebKitCSSMatrix(trans);
-	
-	return m;
+	// Tween between the two decompositions
+	return m1.tween(m2, progress, fn);
 };
 
 
@@ -326,11 +358,19 @@ WebKitCSSMatrix.prototype.decompose = function() {
 		rotate.z = 0;
 	}
 	
-	return {
+	return new CSSMatrixDecomposed({
 		perspective: perspective,
 		translate: translate,
 		skew: skew,
 		scale: scale,
 		rotate: rotate
-	};
-};
+	});
+	
+	// return {
+	// 	perspective: perspective,
+	// 	translate: translate,
+	// 	skew: skew,
+	// 	scale: scale,
+	// 	rotate: rotate
+	// };
+};;

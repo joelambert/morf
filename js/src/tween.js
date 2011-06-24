@@ -124,8 +124,13 @@ var Tween = function(elem, css, opts) {
 	// Create a unique name for this animation
 	animName = 'anim'+(new Date().getTime());
 	
-	//console.log(from.WebkitTransform, to.WebkitTransform, to.WebkitTransform.decompose(), "sdfsdf");
-	//return;
+	// Produce decompositions of matrices here so we don't have to redo it on each iteration
+	// Decomposing the matrix is expensive so we need to minimise these requests
+	if(from['WebkitTransform'])
+	{
+		var m1 = from.WebkitTransform.decompose(),
+			m2 = to.WebkitTransform.decompose();
+	}
 	
 	// Produce style keyframes
 	for(var progress = 0; progress <= 1; progress += options.increment) {
@@ -133,7 +138,10 @@ var Tween = function(elem, css, opts) {
 
 		for(var ruleName in from) {
 			var rule = from[ruleName];
-			frame[ruleName] = rule.tween(to[ruleName], progress, this.fn[options.timingFunction]);
+			if(ruleName === 'WebkitTransform')
+				frame[ruleName] = m1.tween(m2, progress, this.fn[options.timingFunction]);
+			else
+				frame[ruleName] = rule.tween(to[ruleName], progress, this.fn[options.timingFunction]);
 		}
 		
 		keyframes[parseInt(progress*100)+'%'] = frame;
