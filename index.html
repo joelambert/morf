@@ -9,6 +9,13 @@
 		<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/modernizr.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/shifty.min.js" type="text/javascript" charset="utf-8"></script>
+		<!--<script src="js/shifty.core.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/shifty.color.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/shifty.formulas.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/shifty.interpolate.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/shifty.px.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/shifty.queue.js" type="text/javascript" charset="utf-8"></script>-->
 		<script src="js/src/tween.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/src/tween.fn.scripty2.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/src/WebkitCSSMatrix.ext.js" type="text/javascript" charset="utf-8"></script>
@@ -17,13 +24,14 @@
 			$(function(){
 				
 				// List all the available easing functions
-				for(var fx in Tween.prototype.fn) {
+				for(var fx in Tweenable.prototype.formula) {
 					$('ul#custom').append('<li>'+fx+'</li>');
 				}
 
 				$('ul').delegate('li', 'click', function(event){
 					var t = new Tween($('#elem').get(0), {
-										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'750px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)'
+										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'750px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)',
+										//background: window.toggle ? '#ff0000' : '#00ff00'
 									}, {
 										duration: '1500ms',
 										timingFunction: $(this).html()
@@ -38,7 +46,7 @@
 	</head>
 	<body>
 		<div id="container">
-			<div id="elemcontainer"><div id="elem" style="width: 50px; height: 50px; background: red; border: 1px solid #000"></div></div>
+			<div id="elemcontainer"><div id="elem" style="width: 50px; height: 50px; background: #ff0000; border: 1px solid #000"></div></div>
 			<h1>Native</h1>
 			<ul>
 				<li>linear</li>
@@ -47,7 +55,7 @@
 				<li>ease-out</li>
 				<li>ease-in-out</li>
 			</ul>
-			<h1>Custom (borrowed from Scripty 2)</h1>
+			<h1>Custom</h1>
 			<ul id="custom"></ul>
 			<h1>Generated Animation CSS</h1>
 			<pre><code>

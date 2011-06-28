@@ -11,22 +11,6 @@ var Tween = function(elem, css, opts) {
 			return 	val === "" ? 1 : parseFloat(val);
 		},
 		
-		// List of properties that can be modified and the function which handles the values
-		allowedProps = {
-			WebkitTransform: true,
-			width: 			length,
-			height: 		length,
-			marginTop: 		length,
-			marginBottom: 	length,
-			marginLeft: 	length,
-			marginRight: 	length,
-			paddingTop: 	length,
-			paddingBottom: 	length,
-			paddingLeft: 	length,
-			paddingRight: 	length,
-			opacity: 		opacity,
-			borderWidth: 	length 
-		},
 		options = {
 			timingFunction: 'ease',
 			duration: null,
@@ -75,25 +59,21 @@ var Tween = function(elem, css, opts) {
 		elem.style.webkitTransitionTimingFunction = null;
 		elem.style.webkitTransitionDuration = 0;
 	}
-			
 	
 	for(rule in css)
 	{
 		camel = rule.toCamel();	
 		
 		toElem.style[camel] = css[rule];
-		
-		if(allowedProps[camel] !== undefined)
-		{
-			// Set the from/start state	
-			from[camel] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) : allowedProps[camel](elem.style[rule]);
 
-			// Set the to/end state
-			to[camel] 	= (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : allowedProps[camel](css[rule]);
-		}
-	}
+		// Set the from/start state	
+		from[camel.toDash()] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
 	
-	// --- At this point we know that our CSS values are in DOM style camelCase ----------------
+		// Set the to/end state
+		to[camel.toDash()] 	 = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+	}
+
+	// --- At this point we know that our CSS values are in CSS style dash ----------------
 	
 	// Adds the CSS to the current page
 	var addKeyframeRule = function(rule) {
@@ -135,23 +115,20 @@ var Tween = function(elem, css, opts) {
 	
 	// Produce decompositions of matrices here so we don't have to redo it on each iteration
 	// Decomposing the matrix is expensive so we need to minimise these requests
-	if(from['WebkitTransform'])
+	if(from['-webkit-transform'])
 	{
-		m1 = from.WebkitTransform.decompose();
-		m2 = to.WebkitTransform.decompose();
+		m1 = from['-webkit-transform'].decompose();
+		m2 = to['-webkit-transform'].decompose();
 	}
 	
 	// Produce style keyframes
 	for(progress = 0; progress <= 1; progress += options.increment) {
-		frame = {};
-
-		for(ruleName in from) {
-			rule = from[ruleName];
-			if(ruleName === 'WebkitTransform')
-				frame[ruleName] = m1.tween(m2, progress, this.fn[options.timingFunction]);
-			else
-				frame[ruleName] = rule.tween(to[ruleName], progress, this.fn[options.timingFunction]);
-		}
+		// Use Shifty.js to work out the interpolated CSS state
+		frame = Tweenable.util.interpolate(from, to, progress, options.timingFunction);
+		
+		// Work out the interpolated matrix transformation
+		if(m1 !== null && m2 !== null)
+			frame['-webkit-transform'] = m1.tween(m2, progress, Tweenable.prototype.formula[options.timingFunction]);
 		
 		keyframes[parseInt(progress*100)+'%'] = frame;
 	}
@@ -165,7 +142,7 @@ var Tween = function(elem, css, opts) {
 	
 	// Set the final position from as this should be a transition not an animation
 	for(rule in to) 
-		elem.style[rule] = to[rule];
+		elem.style[rule.toCamel()] = to[rule];
 	
 	// Trigger the animation
 	elem.addEventListener('webkitAnimationEnd', animationEndListener);
