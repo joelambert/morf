@@ -1,27 +1,38 @@
+/**
+ * @preserve Tween v@VERSION
+ * http://www.joelambert.co.uk/tween
+ *
+ * Copyright 2011, Joe Lambert.
+ * Free to use under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
 var Tween = function(elem, css, opts) {
-	var from = {},
-		fromElem = document.createElement('div'),
-		to = {},
-		toElem = document.createElement('div'),
+	var from = {}, to = {},
 		
-		length = function(val) {
-			return val;
-		},
-		opacity = function(val){
-			return 	val === "" ? 1 : parseFloat(val);
-		},
+	fromElem = document.createElement('div'),
+	toElem 	 = document.createElement('div'),
 		
-		options = {
-			timingFunction: 'ease',
-			duration: null,
-			increment: 0.01,
-			debug: false
-		},
+	options = {
+		timingFunction: 'ease',
+		duration: null,
+		increment: 0.01,
+		debug: false
+	},
 		
 	// Define all other var's used in the function
 	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = null,
 	
+	// Setup a scoped reference to ourselves
 	_this = this,
+	
+	keyframes = {},
+	
+	// Create a unique name for this animation
+	animName = 'anim'+(new Date().getTime());
+	
+
+	/* --- Helper Functions ------------------------------------------------------------------- */
 	
 	// Event listener for the webkitAnimationEnd Event
 	animationEndListener = function(event){
@@ -30,11 +41,47 @@ var Tween = function(elem, css, opts) {
 		transEvent = document.createEvent("Event");
 		transEvent.initEvent("webkitTransitionEnd", true, true);
 		elem.dispatchEvent(transEvent);
+	},
+	
+	// Adds the CSS to the current page
+	addKeyframeRule = function(rule) {
+		if (document.styleSheets && document.styleSheets.length)
+			document.styleSheets[0].insertRule(rule, 0);
+		else
+		{
+			var style = document.createElement('style');
+			style.innerHTML = rule;
+			document.head.appendChild(style);			
+		}
+	},
+	
+	// Produces a CSS string representation of the Keyframes
+	createAnimationCSS = function(kf, name) {
+		var str = '@-webkit-keyframes '+name+' {\n', f = pos = rule = null, fStr = '';
+		
+		for(pos in kf)
+		{
+			f = kf[pos];
+			fStr = '\t'+pos+' {\n';
+			
+			for(rule in f)
+				fStr += '\t\t'+_this.util.toDash(rule)+': '+f[rule]+';\n';
+			
+			fStr += "\t}\n\n";
+			
+			str += fStr;
+		}
+		
+		return str + " }";
 	};
 	
-	// Setup the options	
+	/* --- Helper Functions End --------------------------------------------------------------- */	
+	
+	
+	// Import the options	
 	for(i in opts)
 		options[i] = opts[i];
+		
 		
 	// If timingFunction is a natively supported function then just trigger normal transition
 	if(	options.timingFunction === 'ease' || 
@@ -58,10 +105,12 @@ var Tween = function(elem, css, opts) {
 	}
 	else
 	{
+		// Reset transition properties for this element
 		elem.style.webkitTransitionTimingFunction = null;
 		elem.style.webkitTransitionDuration = 0;
 	}
 	
+	// Setup the start and end CSS state
 	for(rule in css)
 	{
 		camel = this.util.toCamel(rule);	
@@ -75,45 +124,6 @@ var Tween = function(elem, css, opts) {
 		to[this.util.toDash(camel)]	  = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
 	}
 
-	// --- At this point we know that our CSS values are in CSS style dash ----------------
-	
-	// Adds the CSS to the current page
-	var addKeyframeRule = function(rule) {
-		if (document.styleSheets && document.styleSheets.length)
-			document.styleSheets[0].insertRule(rule, 0);
-		else
-		{
-			var style = document.createElement('style');
-			style.innerHTML = rule;
-			document.head.appendChild(style);			
-		}
-	},
-	
-	// Produces a CSS string representation of the Keyframes
-	createAnimationCSS = function(kf, name) {
-		var str = '@-webkit-keyframes '+name+' {\n', f = pos = rule = null, fStr = '';
-		
-		for(pos in kf)
-		{
-			f = kf[pos];
-			fStr = '\t'+pos+' {\n';
-			
-			
-			for(rule in f)
-				fStr += '\t\t'+_this.util.toDash(rule)+': '+f[rule]+';\n';
-			
-			fStr += "\t}\n\n";
-			
-			str += fStr;
-		}
-		
-		return str + " }";
-	},
-	
-	keyframes = {},
-	
-	// Create a unique name for this animation
-	animName = 'anim'+(new Date().getTime());
 	
 	// Produce decompositions of matrices here so we don't have to redo it on each iteration
 	// Decomposing the matrix is expensive so we need to minimise these requests
@@ -142,7 +152,7 @@ var Tween = function(elem, css, opts) {
 	this.css = createAnimationCSS(keyframes, animName);
 	addKeyframeRule(this.css);
 	
-	// Set the final position as this should be a transition not an animation & the element should end in the 'to' state
+	// Set the final position state as this should be a transition not an animation & the element should end in the 'to' state
 	for(rule in to) 
 		elem.style[this.util.toCamel(rule)] = to[rule];
 	
@@ -156,3 +166,28 @@ var Tween = function(elem, css, opts) {
 	if(options.debug && window.console && window.console.log)
 		console.log(createAnimationCSS(keyframes, animName));
 };
+
+
+/**
+ * Convenience function for triggering a transition
+ * @param {HTMLDom} elem The element to apply the transition to
+ * @param {Object} css Key value pair of CSS properties
+ * @param {Object} opts Additional configuration options
+ * 
+ * Configuration options
+ * -	timingFunction: {String} Name of the easing function to perform
+ * -	duration: {integer} Duration in ms
+ * -	increment: {float} How frequently to generate keyframes (Defaults to 0.01, which is every 1%)
+ * -	debug: {Boolean} Should the generated CSS Animation be printed to the console  
+ *  
+ * @returns {Tween} An instance of the Tween object
+ */
+
+Tween.transition = function(elem, css, opts){
+	return new Tween(elem, css, opts);
+}
+
+/**
+ * Current version
+ */
+Tween.version = '@VERSION';

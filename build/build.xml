@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<build>
+	<version>0.1</version>
+	<docroot>../js/</docroot>
+	<output>
+		<file name="tween">
+			<source>src/tween.js</source>
+			<source>src/tween.utils.js</source>
+			<source>src/WebkitCSSMatrix.ext.js</source>
+			<source>shifty.min.js</source>
+			<source>src/shifty.fn.scripty2.js</source>
+		</file>
+	</output>
+</build>

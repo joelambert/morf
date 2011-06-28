@@ -1,4 +1,6 @@
-/* @preserve Extra easing functions borrowed from scripty2 (c) 2005-2010 Thomas Fuchs (MIT Licence) 
+/**
+ * @preserve 
+ * Extra easing functions borrowed from scripty2 (c) 2005-2010 Thomas Fuchs (MIT Licence) 
  * https://raw.github.com/madrobby/scripty2/master/src/effects/transitions/transitions.js
  */
 
