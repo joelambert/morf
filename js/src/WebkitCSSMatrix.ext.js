@@ -141,8 +141,9 @@ var CSSMatrixDecomposed = function(obj) {
 				'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
 				'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
 				'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')';
-
-		return new WebKitCSSMatrix(trans);
+		
+		try { r = new WebKitCSSMatrix(trans); return r; }
+		catch(e) { console.error('Invalid matrix string: '+trans); return '' };
 	};
 };
 

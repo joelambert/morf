@@ -21,6 +21,8 @@ var Tween = function(elem, css, opts) {
 	// Define all other var's used in the function
 	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = null,
 	
+	_this = this,
+	
 	// Event listener for the webkitAnimationEnd Event
 	animationEndListener = function(event){
 		// Dispatch a faux webkitTransitionEnd event to complete the appearance of this being a transition rather than an animation
@@ -46,7 +48,7 @@ var Tween = function(elem, css, opts) {
 		elem.style.webkitTransitionTimingFunction = options.timingFunction;
 		
 		for(rule in css) {
-			camel = rule.toCamel();	
+			camel = this.util.toCamel(rule);	
 			elem.style[camel] = css[rule];
 		}
 		
@@ -62,15 +64,15 @@ var Tween = function(elem, css, opts) {
 	
 	for(rule in css)
 	{
-		camel = rule.toCamel();	
+		camel = this.util.toCamel(rule);	
 		
 		toElem.style[camel] = css[rule];
 
 		// Set the from/start state	
-		from[camel.toDash()] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
+		from[this.util.toDash(camel)] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
 	
 		// Set the to/end state
-		to[camel.toDash()] 	 = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+		to[this.util.toDash(camel)]	  = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
 	}
 
 	// --- At this point we know that our CSS values are in CSS style dash ----------------
@@ -98,7 +100,7 @@ var Tween = function(elem, css, opts) {
 			
 			
 			for(rule in f)
-				fStr += '\t\t'+rule.toDash()+': '+f[rule]+';\n';
+				fStr += '\t\t'+_this.util.toDash(rule)+': '+f[rule]+';\n';
 			
 			fStr += "\t}\n\n";
 			
@@ -140,25 +142,17 @@ var Tween = function(elem, css, opts) {
 	this.css = createAnimationCSS(keyframes, animName);
 	addKeyframeRule(this.css);
 	
-	// Set the final position from as this should be a transition not an animation
+	// Set the final position as this should be a transition not an animation & the element should end in the 'to' state
 	for(rule in to) 
-		elem.style[rule.toCamel()] = to[rule];
+		elem.style[this.util.toCamel(rule)] = to[rule];
 	
 	// Trigger the animation
 	elem.addEventListener('webkitAnimationEnd', animationEndListener);
 	elem.style.webkitAnimationDuration = options.duration;
 	elem.style.webkitAnimationTimingFunction = 'linear';
 	elem.style.webkitAnimationName = animName;
-
+	
+	// Print the animation to the console if the debug switch is given
 	if(options.debug && window.console && window.console.log)
 		console.log(createAnimationCSS(keyframes, animName));
-};
-
-String.prototype.toDash = function(){
-	var str = this.replace(/([A-Z])/g, function($1){return "-"+$1.toLowerCase();});
-	return /^webkit/.test(str) ? '-'+str : str;
-};
-
-String.prototype.toCamel = function(){
-	return this.replace(/(\-[a-z])/g, function($1){return $1.toUpperCase().replace('-','');});
 };

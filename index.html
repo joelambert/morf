@@ -17,7 +17,8 @@
 		<script src="js/shifty.px.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/shifty.queue.js" type="text/javascript" charset="utf-8"></script>-->
 		<script src="js/src/tween.js" type="text/javascript" charset="utf-8"></script>
-		<script src="js/src/tween.fn.scripty2.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/src/tween.utils.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/src/shifty.fn.scripty2.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/src/WebkitCSSMatrix.ext.js" type="text/javascript" charset="utf-8"></script>
 		
 		<script type="text/javascript" charset="utf-8">
@@ -25,13 +26,13 @@
 				
 				// List all the available easing functions
 				for(var fx in Tweenable.prototype.formula) {
-					$('ul#custom').append('<li>'+fx+'</li>');
+					$('ul#custom').prepend('<li>'+fx+'</li>');
 				}
 
 				$('ul').delegate('li', 'click', function(event){
-					var t = new Tween($('#elem').get(0), {
-										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'750px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)',
-										//background: window.toggle ? '#ff0000' : '#00ff00'
+					event.preventDefault();
+					window.t = new Tween($('#elem').get(0), {
+										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'598px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)'
 									}, {
 										duration: '1500ms',
 										timingFunction: $(this).html()
@@ -39,15 +40,17 @@
 									
 					window.toggle = !window.toggle;
 					
-					$('code').html(t.css);
+					$('section#code').find('textarea').html(t.css.replace(/\t/g, '  '));
 				});
 			});
 		</script>
 	</head>
 	<body>
 		<div id="container">
+			<h1>CSS3 Transitions with custom easing functions</h1>
 			<div id="elemcontainer"><div id="elem" style="width: 50px; height: 50px; background: #ff0000; border: 1px solid #000"></div></div>
-			<h1>Native</h1>
+			<h2>Native</h2>
+			<p>These are the natively supported easing functions, built into WebKit.</p>
 			<ul>
 				<li>linear</li>
 				<li>ease</li>
@@ -55,11 +58,14 @@
 				<li>ease-out</li>
 				<li>ease-in-out</li>
 			</ul>
-			<h1>Custom</h1>
+			<h2>Custom</h2>
+			<p>These are custom easing functions <em>(thanks to Robert Penner &amp; Thomas Fuchs)</em> that can produce much more interesting transitions.</p>
 			<ul id="custom"></ul>
-			<h1>Generated Animation CSS</h1>
-			<pre><code>
-			</code></pre>
+			<h2>Generated Animation CSS</h2>
+			<p>Internally the custom easing function for the transition is faked using CSS animations. Here is the code that is produced on the fly for the most recent "transition".</p>
+			<section id="code">
+				<textarea></textarea>
+			</section>
 		</div>
 	</body>
 </html>
