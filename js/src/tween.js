@@ -154,20 +154,6 @@ var Tween = function(elem, css, opts) {
 		console.log(createAnimationCSS(keyframes, animName));
 };
 
-// Setup a placeholder to load custom easing functions
-Tween.prototype.fn = {};
-
-
-
-String.prototype.tween = function(dest, progress, fn){
-	var v1 = parseInt(this), v2 = parseInt(dest);
-	return parseInt(v1 + ((v2-v1) * fn(progress))) + "px";
-};
-
-Number.prototype.tween = function(dest, progress, fn){
-	return parseFloat(this + ((dest-this) * fn(progress)));
-};
-
 String.prototype.toDash = function(){
 	var str = this.replace(/([A-Z])/g, function($1){return "-"+$1.toLowerCase();});
 	return /^webkit/.test(str) ? '-'+str : str;
