@@ -10,5 +10,11 @@
 			<source>shifty.min.js</source>
 			<source>src/shifty.fn.scripty2.js</source>
 		</file>
+		<file name="tween.noshifty">
+			<source>src/tween.js</source>
+			<source>src/tween.utils.js</source>
+			<source>src/WebkitCSSMatrix.ext.js</source>
+			<source>src/shifty.fn.scripty2.js</source>
+		</file>
 	</output>
 </build>
