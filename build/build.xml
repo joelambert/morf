@@ -3,16 +3,16 @@
 	<version>0.1</version>
 	<docroot>../js/</docroot>
 	<output>
-		<file name="tween">
-			<source>src/tween.js</source>
-			<source>src/tween.utils.js</source>
+		<file name="morf">
+			<source>src/morf.js</source>
+			<source>src/morf.utils.js</source>
 			<source>src/WebkitCSSMatrix.ext.js</source>
 			<source>shifty.min.js</source>
 			<source>src/shifty.fn.scripty2.js</source>
 		</file>
-		<file name="tween.noshifty">
-			<source>src/tween.js</source>
-			<source>src/tween.utils.js</source>
+		<file name="morf.noshifty">
+			<source>src/morf.js</source>
+			<source>src/morf.utils.js</source>
 			<source>src/WebkitCSSMatrix.ext.js</source>
 			<source>src/shifty.fn.scripty2.js</source>
 		</file>

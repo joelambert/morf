@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="css/demo.css" type="text/css" media="screen" title="no title" charset="utf-8">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/modernizr.js" type="text/javascript" charset="utf-8"></script>
-		<script src="js/tween.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/morf.js" type="text/javascript" charset="utf-8"></script>
 		
 		<script type="text/javascript" charset="utf-8">
 			$(function(){
@@ -18,7 +18,7 @@
 
 				$('ul').delegate('li', 'click', function(event){
 					event.preventDefault();
-					window.t = Tween.transition($('#elem').get(0), {
+					window.t = Morf.transition($('#elem').get(0), {
 										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'598px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)'
 									}, {
 										duration: '1500ms',

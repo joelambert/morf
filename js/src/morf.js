@@ -1,13 +1,13 @@
 /**
- * @preserve Tween v@VERSION
- * http://www.joelambert.co.uk/tween
+ * @preserve Morf v@VERSION
+ * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
  * Free to use under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-var Tween = function(elem, css, opts) {
+var Morf = function(elem, css, opts) {
 	var from = {}, to = {},
 		
 	fromElem = document.createElement('div'),
@@ -180,14 +180,14 @@ var Tween = function(elem, css, opts) {
  * -	increment: {float} How frequently to generate keyframes (Defaults to 0.01, which is every 1%)
  * -	debug: {Boolean} Should the generated CSS Animation be printed to the console  
  *  
- * @returns {Tween} An instance of the Tween object
+ * @returns {Morf} An instance of the Morf object
  */
 
-Tween.transition = function(elem, css, opts){
-	return new Tween(elem, css, opts);
+Morf.transition = function(elem, css, opts){
+	return new Morf(elem, css, opts);
 }
 
 /**
  * Current version
  */
-Tween.version = '@VERSION';
+Morf.version = '@VERSION';

@@ -1,5 +1,5 @@
 // Utilities Placeholder
-Tween.prototype.util = {};
+Morf.prototype.util = {};
 
 
 /**
@@ -8,7 +8,7 @@ Tween.prototype.util = {};
  * @returns {String} CSS property name
  */
 
-Tween.prototype.util.toDash = function(str){
+Morf.prototype.util.toDash = function(str){
 	str = str.replace(/([A-Z])/g, function($1){return "-"+$1.toLowerCase();});
 	return /^webkit/.test(str) ? '-'+str : str;
 };
@@ -20,6 +20,6 @@ Tween.prototype.util.toDash = function(str){
  * @returns {String} DOM style string
  */
 
-Tween.prototype.util.toCamel = function(str){
+Morf.prototype.util.toCamel = function(str){
 	return str.replace(/(\-[a-z])/g, function($1){return $1.toUpperCase().replace('-','');});
 };
