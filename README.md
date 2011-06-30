@@ -2,6 +2,8 @@
 
 Morf.js is a Javascript work-around for hardware accelerated CSS3 transitions with custom easing functions. Ever wanted to produce CSS transitions with more compelling effects than just `linear`, `ease`, `ease-out`, `ease-in` or `cubic-bezier`? Well now you can!
 
+[View Demo](http://www.joelambert.co.uk/morf)
+
 # Requirements
 Morf requires the following:
 
@@ -127,6 +129,10 @@ The bulk of this calculation is done using the custom `WebKitCSSMatrix.decompose
 In order to get the `decompose()` function working I also had to supplement the `WebKitCSSMatrix` object with some other helpful matrix functions and add a basic `Vector4` implementation. This may be of use to others so feel free to repurpose the code for your own projects.
 
 ***Note:** The `decompose()` function is fairly expensive so its only called once for the start and end state of each transition.*
+
+# Thanks
+
+A big thanks to [Jeremy Kahn](https://twitter.com/#!/jeremyckahn) for his excellent [Shifty.js](https://github.com/jeremyckahn/shifty) micro-library & for modifying it to make it compatible with Morf!
 
 # License
 

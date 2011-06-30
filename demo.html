@@ -11,6 +11,9 @@
 		<script type="text/javascript" charset="utf-8">
 			$(function(){
 				
+				if(window.WebKitCSSMatrix === undefined || !Modernizr.cssanimations)
+					alert("Morf.js requires a browser that supports CSS3 Animations & implements the WebKitCSSMatrix object");
+					
 				// List all the available easing functions
 				for(var fx in Tweenable.prototype.formula) {
 					$('ul#custom').prepend('<li>'+fx+'</li>');
