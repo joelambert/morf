@@ -130,6 +130,18 @@ In order to get the `decompose()` function working I also had to supplement the 
 
 ***Note:** The `decompose()` function is fairly expensive so its only called once for the start and end state of each transition.*
 
+# Morf.js Ports & Use Cases
+
+- [**webOS Enyo Port**](https://github.com/germboy/MorfJS) - Morf.js ported for use with the Enyo framework for webOS devices such as the HP Touchpad.
+
+# Contributing
+
+Contribution is welcomed but to make it easier to accept a pull request here are some guidelines:
+
+- 	Please make all changes into the source files found under `js/src`. You can then use the build tool (PHP script found at `./build/build`) to create the concatenated and minified files.
+
+- 	Please [camelCase](http://en.wikipedia.org/wiki/CamelCase) your variables.
+
 # Thanks
 
 A big thanks to [Jeremy Kahn](https://twitter.com/#!/jeremyckahn) for his excellent [Shifty.js](https://github.com/jeremyckahn/shifty) micro-library & for modifying it to make it compatible with Morf!
