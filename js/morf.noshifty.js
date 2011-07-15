@@ -1,6 +1,6 @@
 /**
  * @preserve Morf v0.1
- * http://www.joelambert.co.uk/tween
+ * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
  * Free to use under the MIT license.
