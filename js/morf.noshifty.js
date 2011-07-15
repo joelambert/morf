@@ -1,5 +1,5 @@
 /**
- * @preserve Morf v0.1
+ * @preserve Morf v0.1.1
  * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
@@ -190,7 +190,7 @@ Morf.transition = function(elem, css, opts){
 /**
  * Current version
  */
-Morf.version = '0.1';;
+Morf.version = '0.1.1';;
 
 // Utilities Placeholder
 Morf.prototype.util = {};

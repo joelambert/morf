@@ -1,5 +1,5 @@
 /**
- * @preserve Morf v0.1
+ * @preserve Morf v0.1.1
  * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
@@ -41,7 +41,6 @@ var Morf = function(elem, css, opts) {
 		transEvent = document.createEvent("Event");
 		transEvent.initEvent("webkitTransitionEnd", true, true);
 		elem.dispatchEvent(transEvent);
-		alert('done!')
 	},
 	
 	// Adds the CSS to the current page
@@ -158,7 +157,7 @@ var Morf = function(elem, css, opts) {
 		elem.style[this.util.toCamel(rule)] = to[rule];
 	
 	// Trigger the animation
-	elem.addEventListener('webkitAnimationEnd', animationEndListener, true);
+	elem.addEventListener('webkitAnimationEnd', animationEndListener);
 	elem.style.webkitAnimationDuration = options.duration;
 	elem.style.webkitAnimationTimingFunction = 'linear';
 	elem.style.webkitAnimationName = animName;
@@ -191,7 +190,7 @@ Morf.transition = function(elem, css, opts){
 /**
  * Current version
  */
-Morf.version = '0.1';;
+Morf.version = '0.1.1';;
 
 // Utilities Placeholder
 Morf.prototype.util = {};
