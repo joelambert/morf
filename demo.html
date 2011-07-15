@@ -25,7 +25,10 @@
 										'-webkit-transform': 'translate'+(Modernizr.csstransforms3d!==undefined?'3d':'')+'('+ (window.toggle?'0px':'598px') +', 0px'+(Modernizr.csstransforms3d!==undefined?',0px':'')+') rotate('+(window.toggle?0:90)+'deg)'
 									}, {
 										duration: '1500ms',
-										timingFunction: $(this).html()
+										timingFunction: $(this).html(),
+										callback: function () {
+											console.log('This got logged in the callback function!');
+										}
 									});
 									
 					window.toggle = !window.toggle;

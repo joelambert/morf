@@ -41,7 +41,6 @@ var Morf = function(elem, css, opts) {
 		transEvent = document.createEvent("Event");
 		transEvent.initEvent("webkitTransitionEnd", true, true);
 		elem.dispatchEvent(transEvent);
-		alert('done!')
 	},
 	
 	// Adds the CSS to the current page
@@ -158,7 +157,7 @@ var Morf = function(elem, css, opts) {
 		elem.style[this.util.toCamel(rule)] = to[rule];
 	
 	// Trigger the animation
-	elem.addEventListener('webkitAnimationEnd', animationEndListener, true);
+	elem.addEventListener('webkitAnimationEnd', animationEndListener);
 	elem.style.webkitAnimationDuration = options.duration;
 	elem.style.webkitAnimationTimingFunction = 'linear';
 	elem.style.webkitAnimationName = animName;
