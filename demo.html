@@ -27,7 +27,9 @@
 										duration: '1500ms',
 										timingFunction: $(this).html(),
 										callback: function () {
-											console.log('This got logged in the callback function!');
+											if (console && console.log) {
+												console.log('This got logged in the callback function!');
+											}
 										}
 									});
 									
