@@ -27,10 +27,13 @@ Using it is simple but does require that you trigger the transition from Javascr
 			'background-color': '#FF0000'
 		}, {
 			duration: '1500ms',
-			timingFunction: 'bounce'
+			timingFunction: 'bounce',
+			callback: function () {
+				// You can optionally add a callback option for when the animation completes.
+			}
 		});
 
-Thats it! Your element will then transition right 300px, rotate 90deg & change colour to red using the `bounce` easing function.
+Thats it! Your element will then transition right 300px, rotate 90deg & change colour to red using the `bounce` easing function.  If you would like to invoke a function when the animation completes, you can do so with the `callback` option.
 
 ##Using morf.js as a CSS3 Animation Generator
 

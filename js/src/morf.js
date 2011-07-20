@@ -41,6 +41,10 @@ var Morf = function(elem, css, opts) {
 		transEvent = document.createEvent("Event");
 		transEvent.initEvent("webkitTransitionEnd", true, true);
 		elem.dispatchEvent(transEvent);
+		
+		if (opts.callback) {
+			opts.callback();
+		}
 	},
 	
 	// Adds the CSS to the current page
@@ -93,6 +97,16 @@ var Morf = function(elem, css, opts) {
 		
 		elem.style.webkitTransitionDuration = options.duration;
 		elem.style.webkitTransitionTimingFunction = options.timingFunction;
+		
+		// Listen for the transitionEnd event to fire the callback if needed
+		var transitionEndListener = function(event) {
+			elem.removeEventListener('webkitTransitionEnd', transitionEndListener, true);
+			if (opts.callback) {
+				opts.callback();
+			}
+		}
+		
+		elem.addEventListener('webkitTransitionEnd', transitionEndListener, true);
 		
 		for(rule in css) {
 			camel = this.util.toCamel(rule);	
@@ -157,7 +171,7 @@ var Morf = function(elem, css, opts) {
 		elem.style[this.util.toCamel(rule)] = to[rule];
 	
 	// Trigger the animation
-	elem.addEventListener('webkitAnimationEnd', animationEndListener);
+	elem.addEventListener('webkitAnimationEnd', animationEndListener, true);
 	elem.style.webkitAnimationDuration = options.duration;
 	elem.style.webkitAnimationTimingFunction = 'linear';
 	elem.style.webkitAnimationName = animName;
