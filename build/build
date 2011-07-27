@@ -23,7 +23,7 @@
 
 		// Concat javascript files
 		foreach($output->source as $file)
-			$concat .= file_get_contents(dirname(__FILE__)."/$docroot/$file").";\n\n";
+			$concat .= file_get_contents(dirname(__FILE__)."/$docroot/$file")."\n\n";
 
 		// Process any replacements
 		$concat = str_replace('@VERSION', $version, $concat);
