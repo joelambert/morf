@@ -119,7 +119,7 @@ Once you've written your function, you just need to load it into Shifty's availa
 
 So you know how to use it but you want to know how it works? Well, what Morf actually does is create a CSS3 animation on the fly for the requested transition. In other words at the time that `Morf.transition` is called, all the necessary keyframes are generated to give the impression that a transition has taken place.
 
-Even though this is actually a CSS Animation, Morf does its best to masquerade as a transition, event throwing a `webkitTransitionEnd` event when its finished.
+Even though this is actually a CSS Animation, Morf does its best to masquerade as a transition, even throwing a `webkitTransitionEnd` event when its finished.
 
 ## Tweening CSS
 To work out all the interpolated CSS states, Morf uses the fantastic [Shifty.js](https://github.com/jeremyckahn/shifty) along with some custom code to handle matrix transformations. Shifty is responsible for working out all regular CSS tween values. e.g. `width`, `height`, `background-color`.

@@ -21,7 +21,7 @@ var Morf = function(elem, css, opts) {
 	},
 		
 	// Define all other var's used in the function
-	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = null,
+	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = null, cacheKey = '',
 	
 	// Setup a scoped reference to ourselves
 	_this = this,
@@ -124,47 +124,63 @@ var Morf = function(elem, css, opts) {
 		elem.style.webkitTransitionDuration = 0;
 	}
 	
+	// Create the key used to cache this animation
+	cacheKey += options.timingFunction;
+	
 	// Setup the start and end CSS state
 	for(rule in css)
 	{
-		camel = this.util.toCamel(rule);	
+		camel = this.util.toCamel(rule);
 		
 		toElem.style[camel] = css[rule];
 
 		// Set the from/start state	
-		from[this.util.toDash(camel)] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
+		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
 	
 		// Set the to/end state
-		to[this.util.toDash(camel)]	  = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+		to[rule]   = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+		
+		// Update the cacheKey
+		cacheKey += ';' + rule + ':' + from[rule] + '->' + to[rule];
 	}
-
-	
-	// Produce decompositions of matrices here so we don't have to redo it on each iteration
-	// Decomposing the matrix is expensive so we need to minimise these requests
-	if(from['-webkit-transform'])
+		
+	// Check the cache to save expensive calculations
+	if(Morf.cache[cacheKey])
 	{
-		m1 = from['-webkit-transform'].decompose();
-		m2 = to['-webkit-transform'].decompose();
+		this.css = Morf.cache[cacheKey].css;
+		animName = Morf.cache[cacheKey].name;
 	}
-	
-	// Produce style keyframes
-	for(progress = 0; progress <= 1; progress += options.increment) {
-		// Use Shifty.js to work out the interpolated CSS state
-		frame = Tweenable.util.interpolate(from, to, progress, options.timingFunction);
-		
-		// Work out the interpolated matrix transformation
-		if(m1 !== null && m2 !== null)
-			frame['-webkit-transform'] = m1.tween(m2, progress, Tweenable.prototype.formula[options.timingFunction]);
-		
-		keyframes[parseInt(progress*100)+'%'] = frame;
+	else
+	{
+		// Produce decompositions of matrices here so we don't have to redo it on each iteration
+		// Decomposing the matrix is expensive so we need to minimise these requests
+		if(from['-webkit-transform'])
+		{
+			m1 = from['-webkit-transform'].decompose();
+			m2 = to['-webkit-transform'].decompose();
+		}
+
+		// Produce style keyframes
+		for(progress = 0; progress <= 1; progress += options.increment) {
+			// Use Shifty.js to work out the interpolated CSS state
+			frame = Tweenable.util.interpolate(from, to, progress, options.timingFunction);
+
+			// Work out the interpolated matrix transformation
+			if(m1 !== null && m2 !== null)
+				frame['-webkit-transform'] = m1.tween(m2, progress, Tweenable.prototype.formula[options.timingFunction]);
+
+			keyframes[parseInt(progress*100)+'%'] = frame;
+		}
+
+		// Ensure the last frame has been added
+		keyframes['100%'] = to;
+
+		// Add the new animation to the document
+		this.css = createAnimationCSS(keyframes, animName);
+		addKeyframeRule(this.css);
+
+		Morf.cache[cacheKey] = {css: this.css, name: animName};
 	}
-	
-	// Ensure the last frame has been added
-	keyframes['100%'] = to;
-	
-	// Add the new animation to the document
-	this.css = createAnimationCSS(keyframes, animName);
-	addKeyframeRule(this.css);
 	
 	// Set the final position state as this should be a transition not an animation & the element should end in the 'to' state
 	for(rule in to) 
@@ -200,6 +216,11 @@ var Morf = function(elem, css, opts) {
 Morf.transition = function(elem, css, opts){
 	return new Morf(elem, css, opts);
 }
+
+/**
+ * Object to cache generated animations
+ */
+Morf.cache = {};
 
 /**
  * Current version
