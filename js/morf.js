@@ -1,5 +1,5 @@
 /**
- * @preserve Morf v0.1.3
+ * @preserve Morf v0.1.4
  * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
@@ -21,7 +21,7 @@ var Morf = function(elem, css, opts) {
 	},
 		
 	// Define all other var's used in the function
-	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = null, cacheKey = '',
+	i = rule = ruleName = camel = m1 = m2 = progress = frame = rule = transEvent = val = null, cacheKey = '',
 	
 	// Setup a scoped reference to ourselves
 	_this = this,
@@ -29,21 +29,27 @@ var Morf = function(elem, css, opts) {
 	keyframes = {},
 	
 	// Create a unique name for this animation
-	animName = 'anim'+(new Date().getTime());
+	animName = 'anim'+(new Date().getTime()),
 	
 
 	/* --- Helper Functions ------------------------------------------------------------------- */
 	
 	// Event listener for the webkitAnimationEnd Event
 	animationEndListener = function(event){
-		// Dispatch a faux webkitTransitionEnd event to complete the appearance of this being a transition rather than an animation
 		elem.removeEventListener('webkitAnimationEnd', animationEndListener, true);
+		
+		// Dispatch a faux webkitTransitionEnd event to complete the appearance of this being a transition rather than an animation
+		// TODO: Should we throw an event for each property changed? (event.propertyName = 'opacity' etc)
 		transEvent = document.createEvent("Event");
 		transEvent.initEvent("webkitTransitionEnd", true, true);
 		elem.dispatchEvent(transEvent);
 		
-		if (opts.callback) {
-			opts.callback();
+		// Reset transition effects after use
+		elem.style.webkitTransitionTimingFunction = null;
+		elem.style.webkitTransitionDuration = 0;
+		
+		if (options.callback) {
+			options.callback(elem);
 		}
 	},
 	
@@ -101,17 +107,27 @@ var Morf = function(elem, css, opts) {
 		// Listen for the transitionEnd event to fire the callback if needed
 		var transitionEndListener = function(event) {
 			elem.removeEventListener('webkitTransitionEnd', transitionEndListener, true);
-			if (opts.callback) {
-				opts.callback();
+			
+			// Clean up after ourself
+			elem.style.webkitTransitionDuration = 0;
+			elem.style.webkitTransitionTimingFunction = null;
+			
+			if (options.callback) {
+				// Delay execution to ensure the clean up CSS has taken effect
+				setTimeout(function() {
+					options.callback(elem);
+				}, 10);
 			}
-		}
+		};
 		
 		elem.addEventListener('webkitTransitionEnd', transitionEndListener, true);
 		
-		for(rule in css) {
-			camel = this.util.toCamel(rule);	
-			elem.style[camel] = css[rule];
-		}
+		setTimeout(function() {
+			for(rule in css) {
+				camel = _this.util.toCamel(rule);	
+				elem.style[camel] = css[rule];
+			}
+		}, 10);
 		
 		this.css = '';
 		
@@ -135,10 +151,15 @@ var Morf = function(elem, css, opts) {
 		toElem.style[camel] = css[rule];
 
 		// Set the from/start state	
-		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
+		//from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
+		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(window.getComputedStyle(elem)['-webkit-transform'])	: window.getComputedStyle(elem)[rule];
 	
 		// Set the to/end state
 		to[rule]   = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+		
+		// Shifty requires numeric values to be a number rather than a string (e.g. for opacity)
+		from[rule] = from[rule] == (val = parseInt(from[rule], 10)) ? val : from[rule];
+		to[rule]   = to[rule] 	== (val = parseInt(from[rule], 10)) ? val : to[rule];
 		
 		// Update the cacheKey
 		cacheKey += ';' + rule + ':' + from[rule] + '->' + to[rule];
@@ -169,7 +190,7 @@ var Morf = function(elem, css, opts) {
 			if(m1 !== null && m2 !== null)
 				frame['-webkit-transform'] = m1.tween(m2, progress, Tweenable.prototype.formula[options.timingFunction]);
 
-			keyframes[parseInt(progress*100)+'%'] = frame;
+			keyframes[parseInt(progress*100, 10)+'%'] = frame;
 		}
 
 		// Ensure the last frame has been added
@@ -215,7 +236,7 @@ var Morf = function(elem, css, opts) {
 
 Morf.transition = function(elem, css, opts){
 	return new Morf(elem, css, opts);
-}
+};
 
 /**
  * Object to cache generated animations
@@ -225,7 +246,7 @@ Morf.cache = {};
 /**
  * Current version
  */
-Morf.version = '0.1.3';
+Morf.version = '0.1.4';
 
 // Utilities Placeholder
 Morf.prototype.util = {};
