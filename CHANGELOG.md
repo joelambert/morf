@@ -1,4 +1,4 @@
-# v0.1.4 (Unreleased)
+# v0.1.4 (2011/07/30)
 
 - Fixed a bug with numeric values, such as `opacity`
 - Ensured Morf tidies up after itself when using native transitions. Otherwise future CSS changes might be unexpectedly animated
