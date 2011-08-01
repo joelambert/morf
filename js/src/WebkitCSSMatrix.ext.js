@@ -110,7 +110,7 @@ var CSSMatrixDecomposed = function(obj) {
 	
 	for(var i in components)
 		this[i] = obj[i] ? obj[i] : new Vector4();
-	
+
 	/**
 	 * Tween between two decomposed matrices
 	 * @param {CSSMatrixDecomposed} dm The destination decomposed matrix
@@ -123,7 +123,10 @@ var CSSMatrixDecomposed = function(obj) {
 	this.tween = function(dm, progress, fn) {
 		if(fn === undefined)
 			fn = function(pos) {return pos;}; // Default to a linear easing
-			
+		
+		if(!dm)
+			dm = new CSSMatrixDecomposed(new WebKitCSSMatrix().decompose());
+		
 		var r = new CSSMatrixDecomposed(),
 			i = index = null,
 			trans = '';
@@ -132,7 +135,7 @@ var CSSMatrixDecomposed = function(obj) {
 
 		for(index in components)
 			for(i in {x:'x', y:'y', z:'z', w:'w'})
-				r[index][i] = parseFloat((this[index][i] + (dm[index][i] - this[index][i]) * progress ).toFixed(10));
+				r[index][i] = (this[index][i] + (dm[index][i] - this[index][i]) * progress ).toFixed(5);
 
 		trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
 				'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
@@ -141,7 +144,7 @@ var CSSMatrixDecomposed = function(obj) {
 				'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
 				'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
 				'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')';
-		
+
 		try { r = new WebKitCSSMatrix(trans); return r; }
 		catch(e) { console.error('Invalid matrix string: '+trans); return '' };
 	};
@@ -236,7 +239,7 @@ WebKitCSSMatrix.prototype.determinant = function() {
  * Decomposes the matrix into its component parts.
  * A Javascript implementation of the pseudo code available from http://www.w3.org/TR/css3-2d-transforms/#matrix-decomposition
  * @author Joe Lambert
- * @returns {Object} An object with each of the components of the matrix (perspective, translate, skew, scale, rotate)
+ * @returns {Object} An object with each of the components of the matrix (perspective, translate, skew, scale, rotate) or identity matrix on failure
  */
 
 WebKitCSSMatrix.prototype.decompose = function() {
@@ -244,11 +247,10 @@ WebKitCSSMatrix.prototype.decompose = function() {
 		perspectiveMatrix = rightHandSide = inversePerspectiveMatrix = transposedInversePerspectiveMatrix =
 		perspective = translate = row = i = scale = skew = pdum3 =  rotate = null;
 	
-	// Normalize the matrix.
 	if (matrix.m33 == 0)
-	    return false;
+	    return new CSSMatrixDecomposed(new WebKitCSSMatrix().decompose()); // Return the identity matrix
 
-
+	// Normalize the matrix.
 	for (i = 1; i <= 4; i++)
 	    for (j = 1; j <= 4; j++)
 	        matrix['m'+i+j] /= matrix.m44;
@@ -263,7 +265,7 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	perspectiveMatrix.m44 = 1;
 
 	if (perspectiveMatrix.determinant() == 0)
-	    return false;
+	    return new CSSMatrixDecomposed(new WebKitCSSMatrix().decompose()); // Return the identity matrix
 
 	// First, isolate perspective.
 	if (matrix.m14 != 0 || matrix.m24 != 0 || matrix.m34 != 0)
