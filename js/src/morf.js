@@ -246,7 +246,7 @@ var Morf = function(elem, css, opts) {
 	
 	// Print the animation to the console if the debug switch is given
 	if(options.debug && window.console && window.console.log)
-		console.log(createAnimationCSS(keyframes, animName));
+		console.log(this.css);
 };
 
 

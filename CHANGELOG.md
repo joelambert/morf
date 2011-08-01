@@ -1,3 +1,12 @@
+# v0.1.5 (Unreleased)
+
+- Added a sanity check for scale(0) values and replace them with 0.0001. It doesn't seem possible to decompose matrices with scale(0) using the method implemented
+- Switched from Swifty.js to Mifty.js for the core distribution which is a build of Swifty optimised for Morf.js use
+- The `decompose` function now returns the identity matrix on failure to decompose so as not to throw an error
+- Updated the build script to provide output file size and give an estimate of the gzipped file size
+- Added a function to optimise the CSS. WebKitCSSMatrix *always* outputs values to 5 decimal places, to save space the string is now parsed before output
+- Fixed a bug where some transitions would throw errors and miss keyframes when using `-webkit-transform`. Problem was caused by floats with too many decimal places being passed to the `WebKitCSSMatrix` constructor (5 is the limit).
+
 # v0.1.4 (2011/07/30)
 
 - Fixed a bug with numeric values, such as `opacity`

@@ -1,5 +1,5 @@
 /**
- * @preserve Morf v0.1.4
+ * @preserve Morf v0.1.5 (pre release)
  * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
@@ -17,7 +17,9 @@ var Morf = function(elem, css, opts) {
 		timingFunction: 'ease',
 		duration: null,
 		increment: 0.01,
-		debug: false
+		debug: false,
+		optimise: true, // Whether the outputted CSS should be optimised
+		decimalPlaces: 5 // How many decimal places to optimise the WebKitCSSMatrix output to
 	},
 		
 	// Define all other var's used in the function
@@ -82,7 +84,37 @@ var Morf = function(elem, css, opts) {
 			str += fStr;
 		}
 		
-		return str + " }";
+		return options.optimise ? optimiseCSS(str+' }') : str+' }';
+	},
+	
+	// Replaces scale(0) with 0.0001 to get around the inability to these decompose matrix
+	sanityCheckTransformString = function(str) {
+		var scale = str.match(/scale[Y|X|Z]*\([0-9, ]*0[,0-9 ]*\)/g),
+			i = 0;
+		
+		if(scale)
+		{
+			// There might be multiple scale() properties in the string
+			for(i = 0; i < scale.length; i++)
+				str = str.replace(scale[i], scale[i].replace(/([^0-9])0([^0.9])/g, "$10.0001$2"));
+		}
+		
+		return str;
+	},
+	
+	// WebKitCSSMatrix toString() ALWAYS outputs numbers to 5 decimal places - this helps optimise the string
+	optimiseCSS = function(str, decimalPlaces) {
+		decimalPlaces = typeof options.decimalPlaces == 'number' ? options.decimalPlaces : 5;
+		var matches = str.match(/[0-9\.]+/gm), 
+			i = 0;
+		
+		if(matches)
+		{
+			for(i = 0; i < matches.length; i++)
+				str = str.replace(matches[i], parseFloat( parseFloat(matches[i]).toFixed(decimalPlaces)));
+		}
+		
+		return str;
 	};
 	
 	/* --- Helper Functions End --------------------------------------------------------------- */	
@@ -150,12 +182,11 @@ var Morf = function(elem, css, opts) {
 		
 		toElem.style[camel] = css[rule];
 
-		// Set the from/start state	
-		//from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
-		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(window.getComputedStyle(elem)['-webkit-transform'])	: window.getComputedStyle(elem)[rule];
+		// Set the from/start state				
+		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix( sanityCheckTransformString( window.getComputedStyle(elem)['-webkit-transform'] ) )	: window.getComputedStyle(elem)[rule];
 	
 		// Set the to/end state
-		to[rule]   = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+		to[rule]   = (camel == 'WebkitTransform') ? new WebKitCSSMatrix( sanityCheckTransformString( toElem.style.WebkitTransform ) ) : toElem.style[camel];
 		
 		// Shifty requires numeric values to be a number rather than a string (e.g. for opacity)
 		from[rule] = from[rule] == (val = parseInt(from[rule], 10)) ? val : from[rule];
@@ -215,7 +246,7 @@ var Morf = function(elem, css, opts) {
 	
 	// Print the animation to the console if the debug switch is given
 	if(options.debug && window.console && window.console.log)
-		console.log(createAnimationCSS(keyframes, animName));
+		console.log(this.css);
 };
 
 
@@ -246,7 +277,7 @@ Morf.cache = {};
 /**
  * Current version
  */
-Morf.version = '0.1.4';
+Morf.version = '0.1.5 (pre release)';
 
 // Utilities Placeholder
 Morf.prototype.util = {};
@@ -386,7 +417,7 @@ var CSSMatrixDecomposed = function(obj) {
 	
 	for(var i in components)
 		this[i] = obj[i] ? obj[i] : new Vector4();
-	
+
 	/**
 	 * Tween between two decomposed matrices
 	 * @param {CSSMatrixDecomposed} dm The destination decomposed matrix
@@ -399,7 +430,10 @@ var CSSMatrixDecomposed = function(obj) {
 	this.tween = function(dm, progress, fn) {
 		if(fn === undefined)
 			fn = function(pos) {return pos;}; // Default to a linear easing
-			
+		
+		if(!dm)
+			dm = new CSSMatrixDecomposed(new WebKitCSSMatrix().decompose());
+		
 		var r = new CSSMatrixDecomposed(),
 			i = index = null,
 			trans = '';
@@ -408,7 +442,7 @@ var CSSMatrixDecomposed = function(obj) {
 
 		for(index in components)
 			for(i in {x:'x', y:'y', z:'z', w:'w'})
-				r[index][i] = parseFloat((this[index][i] + (dm[index][i] - this[index][i]) * progress ).toFixed(10));
+				r[index][i] = (this[index][i] + (dm[index][i] - this[index][i]) * progress ).toFixed(5);
 
 		trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
 				'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
@@ -417,7 +451,7 @@ var CSSMatrixDecomposed = function(obj) {
 				'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
 				'matrix3d(1,0,0,0, '+r.skew.x+',1,0,0, 0,0,1,0, 0,0,0,1) ' +
 				'scale3d('+r.scale.x+', '+r.scale.y+', '+r.scale.z+')';
-		
+
 		try { r = new WebKitCSSMatrix(trans); return r; }
 		catch(e) { console.error('Invalid matrix string: '+trans); return '' };
 	};
@@ -512,7 +546,7 @@ WebKitCSSMatrix.prototype.determinant = function() {
  * Decomposes the matrix into its component parts.
  * A Javascript implementation of the pseudo code available from http://www.w3.org/TR/css3-2d-transforms/#matrix-decomposition
  * @author Joe Lambert
- * @returns {Object} An object with each of the components of the matrix (perspective, translate, skew, scale, rotate)
+ * @returns {Object} An object with each of the components of the matrix (perspective, translate, skew, scale, rotate) or identity matrix on failure
  */
 
 WebKitCSSMatrix.prototype.decompose = function() {
@@ -520,11 +554,10 @@ WebKitCSSMatrix.prototype.decompose = function() {
 		perspectiveMatrix = rightHandSide = inversePerspectiveMatrix = transposedInversePerspectiveMatrix =
 		perspective = translate = row = i = scale = skew = pdum3 =  rotate = null;
 	
-	// Normalize the matrix.
 	if (matrix.m33 == 0)
-	    return false;
+	    return new CSSMatrixDecomposed(new WebKitCSSMatrix().decompose()); // Return the identity matrix
 
-
+	// Normalize the matrix.
 	for (i = 1; i <= 4; i++)
 	    for (j = 1; j <= 4; j++)
 	        matrix['m'+i+j] /= matrix.m44;
@@ -539,7 +572,7 @@ WebKitCSSMatrix.prototype.decompose = function() {
 	perspectiveMatrix.m44 = 1;
 
 	if (perspectiveMatrix.determinant() == 0)
-	    return false;
+	    return new CSSMatrixDecomposed(new WebKitCSSMatrix().decompose()); // Return the identity matrix
 
 	// First, isolate perspective.
 	if (matrix.m14 != 0 || matrix.m24 != 0 || matrix.m34 != 0)
