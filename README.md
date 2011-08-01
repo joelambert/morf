@@ -8,7 +8,9 @@ Morf.js is a Javascript work-around for hardware accelerated CSS3 transitions wi
 Morf requires the following:
 
 - A WebKit browser capable of CSS Animations (Morf uses `@keyframes` animations under the hood)
-- Shifty.js (>= 0.1.3) - Morf can be downloaded with or without Shifty pre-bundled
+- Shifty.js (>= 0.1.3) - Morf can be downloaded with or without Shifty pre-bundled. 
+
+***Note**: As of Morf.js v0.1.5, Shifty.js has been replaced by Mifty.js in the pre-bundled build. Mifty.js is a special build of Shifty optimised for use with Morf.js, which allows us to reduce the Morf filesize.*
 
 ## Why is this WebKit only?
 
@@ -28,12 +30,44 @@ Using it is simple but does require that you trigger the transition from Javascr
 		}, {
 			duration: '1500ms',
 			timingFunction: 'bounce',
-			callback: function () {
+			callback: function (elem) {
 				// You can optionally add a callback option for when the animation completes.
 			}
 		});
 
 Thats it! Your element will then transition right 300px, rotate 90deg & change colour to red using the `bounce` easing function.  If you would like to invoke a function when the animation completes, you can do so with the `callback` option or listen for the `webkitTransitionEnd` event.
+
+## Additional Parameters
+
+Here is a list of parameters you can pass into the options object:
+
+- 	`duration` *(string)* **required**
+	
+	The length of time the transition is to take. e.g. `1000ms` or `2s`.
+	
+- 	`timingFunction` *(string)* **required**
+
+	The name of the timing function to use. See *Available easing functions* for more details. 
+	
+- 	`callback` *(function)*
+
+	A function to execute once the transition has completed. The element that the transition was applied to is passed back as an argument to the callback function.
+	
+- 	`increment` *(float)* default: `0.01`
+
+	The frequency at which to produce CSS animation keyframes. The default 0.01 produces keyframes at 1% intervals, increasing this value *may* result in uneven animations.
+	
+- 	`debug` *(boolean)* default: `false`
+
+	If set to true then Morf.js will `console.log` the generated CSS.
+	
+- 	`optimise` *(boolean)* default: `true`
+
+	The `WebKitCSSMatrix`'s `toString()` function will output numbers with 5 decimal places, that is you may end up with many `0.00000` references in your outputted CSS. By default Morf will optimise this string. If you wish to get the originally generated string you can by passing in `false`.
+	
+- 	`decimalPlaces` *(int)* default: `5`
+
+	This is the number of decimal places the optimised CSS string will be rounded to. If `optimise` is `false` then this parameter has no effect.
 
 ##Using morf.js as a CSS3 Animation Generator
 
@@ -97,7 +131,7 @@ Adding your own is easy, an easing function has the following prototype:
 		return newPos;
 	};
 	
-Once you've written your function, you just need to load it into Shifty's available formulas. Here's how I add the Scripty2 functions:
+Once you've written your function, you just need to load it into Shifty's available formulas. Here's how I the Scripty2 functions are added:
 
 	(function(){
 		var scripty2 = {
