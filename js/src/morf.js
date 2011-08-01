@@ -17,7 +17,9 @@ var Morf = function(elem, css, opts) {
 		timingFunction: 'ease',
 		duration: null,
 		increment: 0.01,
-		debug: false
+		debug: false,
+		optimise: true, // Whether the outputted CSS should be optimised
+		decimalPlaces: 5 // How many decimal places to optimise the WebKitCSSMatrix output to
 	},
 		
 	// Define all other var's used in the function
@@ -82,7 +84,37 @@ var Morf = function(elem, css, opts) {
 			str += fStr;
 		}
 		
-		return str + " }";
+		return options.optimise ? optimiseCSS(str+' }') : str+' }';
+	},
+	
+	// Replaces scale(0) with 0.0001 to get around the inability to these decompose matrix
+	sanityCheckTransformString = function(str) {
+		var scale = str.match(/scale[Y|X|Z]*\([0-9, ]*0[,0-9 ]*\)/g),
+			i = 0;
+		
+		if(scale)
+		{
+			// There might be multiple scale() properties in the string
+			for(i = 0; i < scale.length; i++)
+				str = str.replace(scale[i], scale[i].replace(/([^0-9])0([^0.9])/g, "$10.0001$2"));
+		}
+		
+		return str;
+	},
+	
+	// WebKitCSSMatrix toString() ALWAYS outputs numbers to 5 decimal places - this helps optimise the string
+	optimiseCSS = function(str, decimalPlaces) {
+		decimalPlaces = typeof options.decimalPlaces == 'number' ? options.decimalPlaces : 5;
+		var matches = str.match(/[0-9\.]+/gm), 
+			i = 0;
+		
+		if(matches)
+		{
+			for(i = 0; i < matches.length; i++)
+				str = str.replace(matches[i], parseFloat( parseFloat(matches[i]).toFixed(decimalPlaces)));
+		}
+		
+		return str;
 	};
 	
 	/* --- Helper Functions End --------------------------------------------------------------- */	
@@ -150,12 +182,11 @@ var Morf = function(elem, css, opts) {
 		
 		toElem.style[camel] = css[rule];
 
-		// Set the from/start state	
-		//from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(elem.style.WebkitTransform) 	: elem.style[camel];
-		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(window.getComputedStyle(elem)['-webkit-transform'])	: window.getComputedStyle(elem)[rule];
+		// Set the from/start state				
+		from[rule] = (camel == 'WebkitTransform') ? new WebKitCSSMatrix( sanityCheckTransformString( window.getComputedStyle(elem)['-webkit-transform'] ) )	: window.getComputedStyle(elem)[rule];
 	
 		// Set the to/end state
-		to[rule]   = (camel == 'WebkitTransform') ? new WebKitCSSMatrix(toElem.style.WebkitTransform) : toElem.style[camel];
+		to[rule]   = (camel == 'WebkitTransform') ? new WebKitCSSMatrix( sanityCheckTransformString( toElem.style.WebkitTransform ) ) : toElem.style[camel];
 		
 		// Shifty requires numeric values to be a number rather than a string (e.g. for opacity)
 		from[rule] = from[rule] == (val = parseInt(from[rule], 10)) ? val : from[rule];
