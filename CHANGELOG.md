@@ -1,4 +1,4 @@
-# v0.1.5 (Unreleased)
+# v0.1.5 (2011/08/05)
 
 - Added a sanity check for scale(0) values and replace them with 0.0001. It doesn't seem possible to decompose matrices with scale(0) using the method implemented
 - Switched from Swifty.js to Mifty.js for the core distribution which is a build of Swifty optimised for Morf.js use

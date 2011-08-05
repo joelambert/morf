@@ -1,5 +1,5 @@
 /**
- * @preserve Morf v0.1.5 (pre release)
+ * @preserve Morf v0.1.5
  * http://www.joelambert.co.uk/morf
  *
  * Copyright 2011, Joe Lambert.
@@ -277,7 +277,7 @@ Morf.cache = {};
 /**
  * Current version
  */
-Morf.version = '0.1.5 (pre release)';
+Morf.version = '0.1.5';
 
 // Utilities Placeholder
 Morf.prototype.util = {};
