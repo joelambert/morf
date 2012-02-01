@@ -1,3 +1,11 @@
+/**
+ * WebKitCSSMatrix Extensions
+ *
+ * Copyright 2011, Joe Lambert (http://www.joelambert.co.uk)
+ * Free to use under the MIT license.
+ * http://joelambert.mit-license.org/
+ */
+
 // Wrap this functionality up to prevent poluting the global namespace
 (function(){
 
