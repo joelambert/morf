@@ -146,7 +146,7 @@ var CSSMatrixDecomposed = function(obj) {
 				r[index][i] = (this[index][i] + (dm[index][i] - this[index][i]) * progress ).toFixed(5);
 
 		trans = 'matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, '+r.perspective.x+', '+r.perspective.y+', '+r.perspective.z+', '+r.perspective.w+') ' +
-				'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.y+'px) ' +
+				'translate3d('+r.translate.x+'px, '+r.translate.y+'px, '+r.translate.z+'px) ' +
 				'rotateX('+r.rotate.x+'rad) rotateY('+r.rotate.y+'rad) rotateZ('+r.rotate.z+'rad) ' +
 				'matrix3d(1,0,0,0, 0,1,0,0, 0,'+r.skew.z+',1,0, 0,0,0,1) ' +
 				'matrix3d(1,0,0,0, 0,1,0,0, '+r.skew.y+',0,1,0, 0,0,0,1) ' +
